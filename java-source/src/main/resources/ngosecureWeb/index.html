@@ -1,0 +1,306 @@
+<!-- Define your frontend here. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NGO Secure</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.0-rc.1/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.2.0/ui-bootstrap-tpls.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/submitDonationModal.js"></script>
+    <script src="js/issueNGOCoinModal.js"></script>
+    <script src="js/transferModal.js"></script>
+    <script src="js/settleModal.js"></script>
+</head>
+
+<body ng-app="demoAppModule" ng-controller="DemoAppCtrl as demoApp">
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">NGO Secure</a>
+        </div>
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">{{demoApp.thisNode}}</a>
+        </div>
+        <button ng-click="demoApp.openSubmitDonationModal()" type="button" class="btn btn-primary navbar-btn">Submit Donation</button>
+        <button ng-click="demoApp.openIssueNGOCoinModal()" type="button" class="btn btn-primary navbar-btn">Issue NGOCoin</button>
+        <button ng-click="demoApp.refresh()" type="button" class="btn btn-default navbar-btn"><span
+                class="glyphicon glyphicon-refresh"></span></button>
+    </div>
+</nav>
+
+<script type="text/ng-template" id="submitDonationModal.html">
+    <div class="modal-header">
+        <h4 class="modal-title">Initiate a donation</h4>
+    </div>
+    <form>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="submitDonationCounterparty" class="control-label">NGO Organization:</label>
+                <select ng-model="submitDonationModal.form.counterparty" class="form-control" id="submitDonationCounterparty"
+                        ng-options="peer as peer for peer in submitDonationModal.peers">
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="submitDonationCurrency" class="control-label">Currency:</label>
+                <input type="text" value="NGO Coin" class="form-control" id="submitDonationCurrency" readonly>
+            </div>
+            <div class="form-group">
+                <label for="submitDonationAmount" class="control-label">Amount (In NGO Coins):</label>
+                <input type="text" ng-model="submitDonationModal.form.amount" class="form-control" id="submitDonationAmount">
+            </div>
+            <div ng-show="submitDonationModal.formError" class="form-group">
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                    Enter valid submit donation parameters
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button ng-click="submitDonationModal.cancel()" type="button" class="btn btn-default">Close</button>
+            <button ng-click="submitDonationModal.create()" type="button" class="btn btn-primary">Submit Donation</button>
+        </div>
+    </form>
+</script>
+
+<script type="text/ng-template" id="submitDonationMsgModal.html">
+    <div class="modal-body" id="submiy-donation-modal-body">
+        {{ submitDonationMsgModal.message }}
+    </div>
+</script>
+
+<script type="text/ng-template" id="issueNGOCoinModal.html">
+    <div class="modal-header">
+        <h4 class="modal-title">Self-issue cash</h4>
+    </div>
+    <form>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="issueNGOCoinCurrency" class="control-label">Currency (ISO code):</label>
+                <input type="text" value="NGO Coin" class="form-control" id="issueNGOCoinCurrency" readonly>
+            </div>
+            <div class="form-group">
+                <label for="issueNGOCoinAmount" class="control-label">Amount (Int):</label>
+                <input type="text" ng-model="issueNGOCoinModal.form.amount" class="form-control" id="issueNGOCoinAmount">
+            </div>
+            <div ng-show="issueNGOCoinModal.formError" class="form-group">
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                    Enter valid cash issuance parameters.
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button ng-click="issueNGOCoinModal.cancel()" type="button" class="btn btn-default">Close</button>
+            <button ng-click="issueNGOCoinModal.issue()" type="button" class="btn btn-primary">Issue NGO Coin</button>
+        </div>
+    </form>
+</script>
+
+<script type="text/ng-template" id="issueNGOCoinMsgModal.html">
+    <div class="modal-body" id="issue-cash-modal-body">
+        {{ issueNGOCoinMsgModal.message }}
+    </div>
+</script>
+
+<script type="text/ng-template" id="transferModal.html">
+    <div class="modal-header">
+        <h4 class="modal-title">Transfer NGO Transaction</h4>
+    </div>
+    <form>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="transferCounterparty" class="control-label">Counter-party:</label>
+                <select ng-model="transferModal.form.counterparty" class="form-control" id="transferCounterparty"
+                        ng-options="peer as peer for peer in transferModal.peers">
+                </select>
+            </div>
+            <div ng-show="transferModal.formError" class="form-group">
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                    Enter valid NGO Transaction transfer parameters.
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button ng-click="transferModal.cancel()" type="button" class="btn btn-default">Close</button>
+            <button ng-click="transferModal.transfer()" type="button" class="btn btn-primary">Transfer</button>
+        </div>
+    </form>
+</script>
+
+<script type="text/ng-template" id="transferMsgModal.html">
+    <div class="modal-body" id="transfer-modal-body">
+        {{ transferMsgModal.message }}
+    </div>
+</script>
+
+<script type="text/ng-template" id="settleModal.html">
+    <div class="modal-header">
+        <h4 class="modal-title">Settle Transaction</h4>
+    </div>
+    <form>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="settleCurrency" class="control-label">Currency:</label>
+                <input type="text"  value="NGO Coin" class="form-control" id="settleCurrency" readonly>
+            </div>
+            <div class="form-group">
+                <label for="settleAmount" class="control-label">Amount:</label>
+                <input type="text" ng-model="settleModal.form.amount" class="form-control" id="settleAmount">
+            </div>
+            <div ng-show="settleModal.formError" class="form-group">
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                    Enter valid NGO Transaction settle parameters.
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button ng-click="settleModal.cancel()" type="button" class="btn btn-default">Close</button>
+            <button ng-click="settleModal.settle()" type="button" class="btn btn-primary">Settle</button>
+        </div>
+    </form>
+</script>
+
+<script type="text/ng-template" id="settleMsgModal.html">
+    <div class="modal-body" id="settle-modal-body">
+        {{ settleMsgModal.message }}
+    </div>
+</script>
+
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">NGO Coin Balance</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Amount</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="cash in demoApp.cashBalances">
+                        <td class="vert-align">{{cash}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <div ng-show="!demoApp.activetxns.length" class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Active Transactions</h3>
+            </div>
+            <div class="panel-body">No active transactions. Use the "Submit Donation" button to initiate a donation with a NGO org.</div>
+        </div>
+        <div ng-show="demoApp.activetxns.length" class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Active Transactions</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Donor</th>
+                        <th>NGO Organization</th>
+                        <th>Amount</th>
+                        <th>Paid</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="activetxn in demoApp.activetxns">
+                        <td class="vert-align">{{activetxn.borrower.substring(0,30)}}</td>
+                        <td class="vert-align">{{activetxn.lender.substring(0,30)}}</td>
+                        <td class="vert-align">{{activetxn.amountLentVal}}</td>
+                        <td class="vert-align">{{activetxn.amountPaidVal}}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button ng-click="demoApp.openTransferModal(activetxn.linearId.id)" type="button" class="btn btn-primary">Transfer
+                                </button>
+                                <button ng-click="demoApp.openSettleModal(activetxn.linearId.id,activetxn.lenderName)" type="button" class="btn btn-primary">Settle
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <div ng-show="!demoApp.txns.length" class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Transaction Ledger</h3>
+            </div>
+            <div class="panel-body">No transactions to show. Only the Notary is authorized to view the ledger in its entirety.</div>
+        </div>
+        <div ng-show="demoApp.txns.length" class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Transaction Ledger</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Country</th>
+                        <th>City</th>
+                        <th>Organization</th>
+                        <th>Donor</th>
+                        <th>Notary</th>
+                        <th>Amount</th>
+                        <th>Transaction Type</th>
+                        <th>Timestamp</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="txn in demoApp.txns">
+                        <td class="vert-align">{{txn.country}}</td>
+                        <td class="vert-align">{{txn.city}}</td>
+                        <td class="vert-align">{{txn.organization}}</td>
+                        <td class="vert-align">{{txn.donor}}</td>
+                        <td class="vert-align">{{txn.notary}}</td>
+                        <td class="vert-align">{{txn.amount}}</td>
+                        <td class="vert-align">{{txn.txn_TYPE}}</td>
+                        <td class="vert-align">{{txn.timestamp}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+</div>
+
+</body>
+</html>

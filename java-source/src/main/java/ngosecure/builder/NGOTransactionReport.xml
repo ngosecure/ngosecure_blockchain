@@ -1,0 +1,25 @@
+<beanio xmlns="http://www.beanio.org/2012/03">
+  <stream name="ngotransactionreport" format="csv" strict="true">
+    <record name="headerRecord" class="ngosecure.vo.NGOTransactionHeader" maxOccurs="1">
+      <field name="COUNTRY" required="true"/>
+      <field name="CITY" required="true"/>
+      <field name="ORGANIZATION" required="true"/>
+      <field name="DONOR" required="true"/>
+      <field name="NOTARY" required="true"/>
+      <field name="AMOUNT" required="true"/>
+      <field name="TXN_TYPE" required="true"/>
+      <field name="TIMESTAMP" required="true"/>
+    </record>
+
+    <record name="reportRecord" class="ngosecure.vo.NGOTransactionReport" maxOccurs="unbounded">
+      <field name="COUNTRY" required="true"/>
+      <field name="CITY" required="true"/>
+      <field name="ORGANIZATION" required="true"/>
+      <field name="DONOR" required="true"/>
+      <field name="NOTARY" required="true"/>
+      <field name="AMOUNT" required="true"/>
+      <field name="TXN_TYPE" required="true"/>
+      <field name="TIMESTAMP" required="true"/>
+    </record>
+  </stream>
+</beanio>

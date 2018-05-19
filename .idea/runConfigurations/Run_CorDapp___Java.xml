@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run CorDapp - Java" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="C:/Program Files (x86)/Java/jdk1.8.0_151/jre" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="MAIN_CLASS_NAME" value="ngosecure.NodeDriver" />
+    <module name="java-source_test" />
+    <option name="VM_PARAMETERS" value="-ea -javaagent:lib/quasar.jar" />
+    <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="ngosecure.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <shortenClasspath name="MANIFEST" />
+    <method />
+  </configuration>
+</component>
