@@ -178,8 +178,9 @@ public class NGOSecureApi {
                                 split(",")[0].split("=")[1];
                     }
 
-                    if(issuerParty.equalsIgnoreCase(borrowerParty) && issuerParty.
-                            equalsIgnoreCase(myIdentity.getName().getOrganisation())){
+                    if(issuerParty.equalsIgnoreCase(borrowerParty) && (issuerParty.
+                            equalsIgnoreCase(myIdentity.getName().getOrganisation())
+                            || isnotary())){
                         ngoTransactionReport.setCITY(issuerCity);
                         ngoTransactionReport.setCOUNTRY(issuerCountry);
                         ngoTransactionReport.setORGANIZATION(borrowerParty);
@@ -189,6 +190,8 @@ public class NGOSecureApi {
                         ngoTransactionReport.setTXN_TYPE(NGOTransactionType.SELF_ISSUANCE.toString());
                         ngoTransactionReport.setPAID(String.valueOf(fungibleAsset.getAmount().
                                 toDecimal()) + " " + NGOConstants.NGO_CURRENCY);
+                        ngoTransactionReport.setNOTARY(rpcOps.notaryIdentities().get(0).getName()
+                                .getOrganisation());
 
                         ngoTransactionReports.add(ngoTransactionReport);
                     }else if(!issuerParty.equalsIgnoreCase(borrowerParty)){
@@ -202,6 +205,8 @@ public class NGOSecureApi {
                         ngoTransactionReport.setTXN_TYPE(NGOTransactionType.SETTLEMENT.toString());
                         ngoTransactionReport.setPAID(String.valueOf(fungibleAsset.getAmount().
                                 toDecimal()) + " " + NGOConstants.NGO_CURRENCY);
+                        ngoTransactionReport.setNOTARY(rpcOps.notaryIdentities().get(0).getName()
+                                .getOrganisation());
 
                         ngoTransactionReports.add(ngoTransactionReport);
                     }
@@ -274,6 +279,8 @@ public class NGOSecureApi {
                         ngoTransactionReport.setTXN_TYPE(NGOTransactionType.ISSUANCE.toString());
                         ngoTransactionReport.setPAID(String.valueOf(ledgerNGOTxn.getPaid().
                                 toDecimal()) + " " + NGOConstants.NGO_CURRENCY);
+                        ngoTransactionReport.setNOTARY(rpcOps.notaryIdentities().get(0).getName()
+                                .getOrganisation());
 
                         ngoTransactionReports.add(ngoTransactionReport);
                     }
@@ -282,7 +289,7 @@ public class NGOSecureApi {
             }
         }
         return ngoTransactionReports;
-      //  return new NGOSecureUtil().retrieveLedgerTransactions(myIdentity.getName().getOrganisation());
+        //  return new NGOSecureUtil().retrieveLedgerTransactions(myIdentity.getName().getOrganisation());
     }
 
 
