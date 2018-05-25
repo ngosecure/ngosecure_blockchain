@@ -9,6 +9,7 @@ public class NGOTransactionReport {
     private String DONOR;
     private String TXN_TYPE;
     private String TIMESTAMP;
+    private String PAID;
 
     public String getCOUNTRY() {
         return COUNTRY;
@@ -90,4 +91,11 @@ public class NGOTransactionReport {
         this.DONOR = donor;
     }
 
+    public String getPAID() {
+        return PAID;
+    }
+
+    public void setPAID(String PAID) {
+        this.PAID = PAID;
+    }
 }

@@ -2,16 +2,22 @@ package ngosecure.api;
 
 import com.google.common.collect.ImmutableMap;
 import net.corda.core.contracts.Amount;
+import net.corda.core.contracts.FungibleAsset;
 import net.corda.core.contracts.StateAndRef;
 import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.identity.AbstractParty;
+import net.corda.core.identity.AnonymousParty;
 import net.corda.core.identity.CordaX500Name;
 import net.corda.core.identity.Party;
 import net.corda.core.messaging.CordaRPCOps;
+import net.corda.core.messaging.DataFeed;
 import net.corda.core.messaging.FlowHandle;
+import net.corda.core.node.NodeInfo;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.utilities.OpaqueBytes;
 import net.corda.finance.contracts.asset.Cash;
+import net.corda.finance.contracts.asset.CommodityContract;
+import net.corda.finance.contracts.asset.Obligation;
 import net.corda.finance.flows.AbstractCashFlow;
 import net.corda.finance.flows.CashIssueFlow;
 import ngosecure.constants.NGOConstants;
@@ -118,8 +124,167 @@ public class NGOSecureApi {
     @Path("transactionledger")
     @Produces(MediaType.APPLICATION_JSON)
     public List<NGOTransactionReport> transactionledger() {
-        return new NGOSecureUtil().retrieveLedgerTransactions(myIdentity.getName().getOrganisation());
+
+        List<NGOTransactionReport> ngoTransactionReports = new ArrayList<NGOTransactionReport>();
+        NGOTransactionReport ngoTransactionReport;
+        List<SignedTransaction> verifiedTxns = rpcOps.internalVerifiedTransactionsSnapshot();
+
+        System.out.println("Verified Txn count: " + verifiedTxns.size());
+
+        if(verifiedTxns.size()>0){
+            Iterator<SignedTransaction> signedTransactionIterator = verifiedTxns.iterator();
+            while(signedTransactionIterator.hasNext()){
+                SignedTransaction signedTransaction = signedTransactionIterator.next();
+
+                List<StateAndRef<FungibleAsset>> cashRef =
+                        signedTransaction.getCoreTransaction().outRefsOfType(FungibleAsset.class);
+                Iterator<StateAndRef<FungibleAsset>> cashIterator = cashRef.iterator();
+
+                //Checking cash transactions in the ledger
+                while(cashIterator.hasNext()){
+                    ngoTransactionReport = new NGOTransactionReport();
+                    StateAndRef<FungibleAsset> fungibleAssetStateAndRef = cashIterator.next();
+                    FungibleAsset fungibleAsset = fungibleAssetStateAndRef.getState().getData();
+
+                    String issuedCashStr = fungibleAsset.getAmount().toString();
+                    String issuerParty = issuedCashStr.substring(issuedCashStr.lastIndexOf("O=")).
+                            split(",")[0].split("=")[1];
+
+                    AbstractParty knownBorrower = rpcOps.wellKnownPartyFromAnonymous(fungibleAsset.getOwner());
+
+                    if(knownBorrower == null){
+                        knownBorrower = fungibleAsset.getOwner();
+                    }
+
+                    String borrowerPartyStr = knownBorrower.toString();
+                    String borrowerParty = null;
+                    String issuerCity = null;
+                    String issuerCountry= null;
+
+                    System.out.println("borrowerPartyStr: " + borrowerPartyStr);
+
+                    if(borrowerPartyStr.contains("O=")){
+                        borrowerParty = borrowerPartyStr.substring(borrowerPartyStr.lastIndexOf("O=")).
+                                split(",")[0].split("=")[1];
+                    }
+
+                    if(issuedCashStr.contains("L=")){
+                        issuerCity = issuedCashStr.substring(issuedCashStr.lastIndexOf("L=")).
+                                split(",")[0].split("=")[1];
+                    }
+
+                    if(issuedCashStr.contains("C=")){
+                        issuerCountry = issuedCashStr.substring(issuedCashStr.lastIndexOf("C=")).
+                                split(",")[0].split("=")[1];
+                    }
+
+                    if(issuerParty.equalsIgnoreCase(borrowerParty) && issuerParty.
+                            equalsIgnoreCase(myIdentity.getName().getOrganisation())){
+                        ngoTransactionReport.setCITY(issuerCity);
+                        ngoTransactionReport.setCOUNTRY(issuerCountry);
+                        ngoTransactionReport.setORGANIZATION(borrowerParty);
+                        ngoTransactionReport.setDONOR(issuerParty);
+                        ngoTransactionReport.setAMOUNT(String.valueOf(fungibleAsset.getAmount().
+                                toDecimal()) + " " + NGOConstants.NGO_CURRENCY);
+                        ngoTransactionReport.setTXN_TYPE(NGOTransactionType.SELF_ISSUANCE.toString());
+                        ngoTransactionReport.setPAID(String.valueOf(fungibleAsset.getAmount().
+                                toDecimal()) + " " + NGOConstants.NGO_CURRENCY);
+
+                        ngoTransactionReports.add(ngoTransactionReport);
+                    }else if(!issuerParty.equalsIgnoreCase(borrowerParty)){
+
+                        ngoTransactionReport.setCITY(issuerCity);
+                        ngoTransactionReport.setCOUNTRY(issuerCountry);
+                        ngoTransactionReport.setORGANIZATION(isnotary() ? borrowerPartyStr : borrowerParty);
+                        ngoTransactionReport.setDONOR(issuerParty);
+                        ngoTransactionReport.setAMOUNT(String.valueOf(fungibleAsset.getAmount().
+                                toDecimal()) + " " + NGOConstants.NGO_CURRENCY);
+                        ngoTransactionReport.setTXN_TYPE(NGOTransactionType.SETTLEMENT.toString());
+                        ngoTransactionReport.setPAID(String.valueOf(fungibleAsset.getAmount().
+                                toDecimal()) + " " + NGOConstants.NGO_CURRENCY);
+
+                        ngoTransactionReports.add(ngoTransactionReport);
+                    }
+
+                    System.out.println("Cash City " + ngoTransactionReport.getCITY());
+                    System.out.println("Cash Country: " +ngoTransactionReport.getCOUNTRY());
+                    System.out.println("Cash Org: " + ngoTransactionReport.getORGANIZATION());
+                    System.out.println("Cash Donor: " +ngoTransactionReport.getDONOR());
+                    System.out.println("Cash Amount: " +ngoTransactionReport.getAMOUNT());
+                    System.out.println("Cash TxnType: " +ngoTransactionReport.getTXN_TYPE());
+                }
+
+                List<StateAndRef<NGOTransaction>> verifiedStates = signedTransaction.getCoreTransaction().
+                        outRefsOfType(NGOTransaction.class);
+                Iterator<StateAndRef<NGOTransaction>> stateAndRefIterator = verifiedStates.iterator();
+
+                //NGO txn records
+                if(!isnotary()){
+                    while(stateAndRefIterator.hasNext()){
+                        StateAndRef<NGOTransaction> ngoTransactionStateAndRef = stateAndRefIterator.next();
+                        NGOTransaction ngoTransaction = ngoTransactionStateAndRef.getState().getData();
+                        ngoTransactionReport = new NGOTransactionReport();
+
+                        if(ngoTransaction.getBorrower().nameOrNull() != null){
+                            System.out.println("KnownBorrower: " + ngoTransaction.getBorrower().nameOrNull().
+                                    getOrganisation());
+                        }
+
+                        if(ngoTransaction.getLender().nameOrNull() != null){
+                            System.out.println("KnownLender: " + ngoTransaction.getLender().nameOrNull().
+                                    getOrganisation());
+                        }
+
+
+                        AbstractParty possiblyWellKnownLender = rpcOps.wellKnownPartyFromAnonymous(ngoTransaction.getLender());
+                        if (possiblyWellKnownLender == null) {
+                            possiblyWellKnownLender = ngoTransaction.getLender();
+                        }
+
+                        AbstractParty possiblyWellKnownBorrower = rpcOps.wellKnownPartyFromAnonymous(ngoTransaction.getBorrower());
+                        if (possiblyWellKnownBorrower == null) {
+                            possiblyWellKnownBorrower = ngoTransaction.getBorrower();
+                        }
+                        NGOTransaction ledgerNGOTxn = new NGOTransaction(ngoTransaction.getAmount(),
+                                possiblyWellKnownLender,possiblyWellKnownBorrower,ngoTransaction.getPaid(),
+                                ngoTransaction.getLinearId());
+
+                        System.out.println("LedgerLender" + possiblyWellKnownLender);
+
+                        if(possiblyWellKnownBorrower.nameOrNull() != null){
+                            System.out.println("WellKnownBorrower: " + possiblyWellKnownBorrower.nameOrNull().
+                                    getOrganisation());
+                        }
+
+                        if(possiblyWellKnownLender.nameOrNull() != null){
+                            System.out.println("WellKnownLender: " + possiblyWellKnownLender.nameOrNull().
+                                    getOrganisation());
+                        }
+
+                        System.out.println("LedgerBorrower" + possiblyWellKnownBorrower);
+
+
+
+                        ngoTransactionReport.setCITY(ledgerNGOTxn.getLender().nameOrNull().getLocality());
+                        ngoTransactionReport.setCOUNTRY(ledgerNGOTxn.getLender().nameOrNull().getCountry());
+                        ngoTransactionReport.setORGANIZATION(ledgerNGOTxn.getLenderName());
+                        ngoTransactionReport.setDONOR(isnotary() ? ngoTransaction.getBorrower().toString()
+                                : ledgerNGOTxn.getBorrowerName());
+                        ngoTransactionReport.setAMOUNT(ledgerNGOTxn.getAmountLentVal());
+                        ngoTransactionReport.setTXN_TYPE(NGOTransactionType.ISSUANCE.toString());
+                        ngoTransactionReport.setPAID(String.valueOf(ledgerNGOTxn.getPaid().
+                                toDecimal()) + " " + NGOConstants.NGO_CURRENCY);
+
+                        ngoTransactionReports.add(ngoTransactionReport);
+                    }
+                }
+
+            }
+        }
+        return ngoTransactionReports;
+      //  return new NGOSecureUtil().retrieveLedgerTransactions(myIdentity.getName().getOrganisation());
     }
+
 
     @GET
     @Path("cash")
