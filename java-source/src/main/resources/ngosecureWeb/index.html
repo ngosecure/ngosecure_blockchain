@@ -21,6 +21,28 @@
     <script src="js/issueNGOCoinModal.js"></script>
     <script src="js/transferModal.js"></script>
     <script src="js/settleModal.js"></script>
+    <style>
+.glyphicon.spinning {
+    animation: spin 1s infinite linear;
+    -webkit-animation: spin2 1s infinite linear;
+}
+@keyframes spin {
+    from {
+        transform: scale(1) rotate(0deg);
+    }
+    to {
+        transform: scale(1) rotate(360deg);
+    }
+}
+@-webkit-keyframes spin2 {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}
+</style>
 </head>
 
 <body ng-app="demoAppModule" ng-controller="DemoAppCtrl as demoApp">
@@ -36,6 +58,11 @@
         <button ng-click="demoApp.openIssueNGOCoinModal()" type="button" class="btn btn-primary navbar-btn">Issue NGOCoin</button>
         <button ng-click="demoApp.refresh()" type="button" class="btn btn-default navbar-btn"><span
                 class="glyphicon glyphicon-refresh"></span></button>
+        <button ng-show="!demoApp.isnotary" ng-click="demoApp.insights()" type="button" class="btn btn-default navbar-btn">
+            <span class="glyphicon glyphicon-stats"></span>
+            <span ng-show="demoApp.insightbuttontext == 'Checking for insights'"><i class="glyphicon glyphicon-refresh spinning"></i></span>
+            {{ demoApp.insightbuttontext }}
+        </button>
     </div>
 </nav>
 
@@ -203,6 +230,35 @@
                     </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+</div>
+
+<div class="row" ng-show="!demoApp.isnotary">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">NGO Secure Insights</h3>
+            </div>
+            <div class="panel-body" ng-show="demoApp.insightparties.length">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>NGO organizations running a NGOCoin {{demoApp.insightstate}}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="insightparty in demoApp.insightparties">
+                        <td class="vert-align">{{insightparty}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="panel-body" ng-show="!demoApp.insightparties.length">
+                Click Insights to check with the NGO Secure Insights Engine.
             </div>
         </div>
         <div class="col-md-1"></div>

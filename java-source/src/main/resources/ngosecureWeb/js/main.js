@@ -1,10 +1,11 @@
 "use strict";
 
 // Define your backend here.
-angular.module('demoAppModule', ['ui.bootstrap']).controller('DemoAppCtrl', function($http, $location, $uibModal) {
+angular.module('demoAppModule', ['ui.bootstrap']).controller('DemoAppCtrl', function($http, $location, $uibModal,$timeout) {
     const demoApp = this;
 
     const apiBaseURL = "/api/ngosecure/";
+    demoApp.insightbuttontext = "Insights";
 
     // Retrieves the identity of this and other nodes.
     let peers = [];
@@ -74,6 +75,24 @@ angular.module('demoAppModule', ['ui.bootstrap']).controller('DemoAppCtrl', func
         settleModal.result.then(() => {}, () => {});
     };
 
+
+    demoApp.insights = () => {
+        // Check for NGO Secure insights
+        demoApp.insightbuttontext = "Checking for insights";
+        $http.get(apiBaseURL + "ngoSecureInsights").then((response) => demoApp.insights =
+                                     response.data);
+			   $timeout(function(){
+               				angular.forEach(demoApp.insights, function (value, key) {
+                       		demoApp.insightstate = key;
+                       		demoApp.insightparties = value;
+               				});
+                    window.alert("New insights available from NGOSecure Insights engine !!");
+                    demoApp.insightbuttontext = "Insights";
+                }, 60000);
+
+    }
+
+
     /** Refreshes the front-end. */
     demoApp.refresh = () => {
         // Update the list of NGO Txns.
@@ -87,6 +106,7 @@ angular.module('demoAppModule', ['ui.bootstrap']).controller('DemoAppCtrl', func
         //Retrieves the ledger transactions
         $http.get(apiBaseURL + "transactionledger").then((response) => demoApp.txns =
                     Object.keys(response.data).map((key) => response.data[key]));
+
     }
 
     demoApp.refresh();

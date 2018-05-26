@@ -25,7 +25,9 @@ import ngosecure.enums.NGOTransactionType;
 import ngosecure.flows.NGOTransactionIssuance;
 import ngosecure.flows.NGOTransactionSettlement;
 import ngosecure.flows.NGOTransactionTransfer;
+import ngosecure.util.NGOInsightsProcessor;
 import ngosecure.util.NGOSecureUtil;
+import ngosecure.vo.NGOInsightReport;
 import ngosecure.vo.NGOTransaction;
 import ngosecure.vo.NGOTransactionReport;
 
@@ -118,6 +120,42 @@ public class NGOSecureApi {
                             state.getLinearId());
                 })
                 .collect(toList());
+    }
+
+    @GET
+    @Path("ngoSecureInsights")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Map<String,List<String>>  ngoSecureInsights(){
+        Map<String,List<String>>  insightPartyMap = new HashMap<>();
+        try{
+            String orgPrediction = null;
+            NGOInsightsProcessor ngoInsightsProcessor = new NGOInsightsProcessor();
+            NGOInsightReport ngoInsightReport = ngoInsightsProcessor.retrieveNGOInsights();
+            Map<String,String> ngoOrgMap = ngoInsightReport.getORGANIZATION();
+            Iterator<String> orgIterator = ngoOrgMap.keySet().iterator();
+
+            while (orgIterator.hasNext()){
+                String org = orgIterator.next();
+                if(ngoOrgMap.get(org).equalsIgnoreCase(myIdentity.getName().getOrganisation())){
+                    orgPrediction = ngoInsightsProcessor.retrieveInsightKey(ngoInsightReport.getPREDICTION().get(org));
+                    break;
+                }
+            }
+            if(orgPrediction != null) {
+                Map<String,List<String>> insightPredictionMap =  new NGOInsightsProcessor().buildInsightsMap(ngoInsightReport);
+                if(orgPrediction.equalsIgnoreCase(NGOConstants.NGO_PARTIES_WITH_DEFICIT)){
+                    insightPartyMap.put(NGOConstants.NGO_PARTIES_WITH_SURPLUS,insightPredictionMap.
+                            get(NGOConstants.NGO_PARTIES_WITH_SURPLUS));
+                }else if(orgPrediction.equalsIgnoreCase(NGOConstants.NGO_PARTIES_WITH_SURPLUS)){
+                    insightPartyMap.put(NGOConstants.NGO_PARTIES_WITH_DEFICIT,insightPredictionMap.
+                            get(NGOConstants.NGO_PARTIES_WITH_DEFICIT));
+                }
+            }
+
+        }catch(Exception ex){
+            System.out.println("Error while retrieving insights: " + ex);
+        }
+        return insightPartyMap;
     }
 
     @GET

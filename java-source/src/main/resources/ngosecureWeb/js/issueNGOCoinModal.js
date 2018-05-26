@@ -1,7 +1,6 @@
 "use strict";
 
 angular.module('demoAppModule').controller('IssueNGOCoinModalCtrl', function($http, $uibModalInstance, $uibModal, apiBaseURL,$window) {
-    window.alert("Welcome to NGO Secure. We appreciate your concern for the needy !!!");
     const issueNGOCoinModal = this;
 
     issueNGOCoinModal.form = {};

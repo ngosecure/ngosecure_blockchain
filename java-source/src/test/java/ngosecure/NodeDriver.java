@@ -40,9 +40,6 @@ public class NodeDriver {
                 NodeHandle nodeC = dsl.startNode(new NodeParameters()
                         .withProvidedName(new CordaX500Name("PartyC", "Paris", "FR"))
                         .withRpcUsers(ImmutableList.of(user))).get();
-                NodeHandle nodeD = dsl.startNode(new NodeParameters()
-                        .withProvidedName(new CordaX500Name("PartyD", "Chennai", "IN"))
-                        .withRpcUsers(ImmutableList.of(user))).get();
 
 
 
@@ -63,7 +60,6 @@ public class NodeDriver {
                 dsl.startWebserver(nodeA);
                 dsl.startWebserver(nodeB);
                 dsl.startWebserver(nodeC);
-                dsl.startWebserver(nodeD);
             } catch (Throwable e) {
                 System.err.println("Encountered exception in node startup: " + e.getMessage());
                 e.printStackTrace();
