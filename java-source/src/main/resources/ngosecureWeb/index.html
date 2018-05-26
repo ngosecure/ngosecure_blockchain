@@ -52,13 +52,13 @@
             <a class="navbar-brand" href="#">NGO Secure</a>
         </div>
         <div class="navbar-header">
-            <a class="navbar-brand" href="#">{{demoApp.thisNode}}</a>
+            <a class="navbar-text" href="#">{{demoApp.thisNode}}</a>
         </div>
         <button ng-click="demoApp.openSubmitDonationModal()" type="button" class="btn btn-primary navbar-btn">Submit Donation</button>
         <button ng-click="demoApp.openIssueNGOCoinModal()" type="button" class="btn btn-primary navbar-btn">Issue NGOCoin</button>
         <button ng-click="demoApp.refresh()" type="button" class="btn btn-default navbar-btn"><span
                 class="glyphicon glyphicon-refresh"></span></button>
-        <button ng-show="!demoApp.isnotary" ng-click="demoApp.insights()" type="button" class="btn btn-default navbar-btn">
+        <button ng-show="!demoApp.isnotary" ng-click="demoApp.insights()" type="button" class="btn btn-success navbar-btn">
             <span class="glyphicon glyphicon-stats"></span>
             <span ng-show="demoApp.insightbuttontext == 'Checking for insights'"><i class="glyphicon glyphicon-refresh spinning"></i></span>
             {{ demoApp.insightbuttontext }}
