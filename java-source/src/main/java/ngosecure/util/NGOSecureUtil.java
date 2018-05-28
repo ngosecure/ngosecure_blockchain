@@ -27,8 +27,7 @@ public class NGOSecureUtil {
         BeanWriter beanWriter;
         BeanReader beanReader;
         StreamFactory streamFactory = StreamFactory.newInstance();
-        streamFactory.load(System.getProperty("user.dir") +
-                "\\java-source\\src\\main\\java\\ngosecure\\builder\\NGOTransactionReport.xml");
+        streamFactory.load( "C:\\BlockChain\\ngosecure_blockchain\\builder\\NGOTransactionReport.xml");
         System.out.println("Bean io xml loaded");
         Boolean reportFileExists = new File(REPORT_OUTPUT_PATH, REPORT_FILE_NAME +
                 REPORT_MIME_TYPE_EXT).exists();

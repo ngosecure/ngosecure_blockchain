@@ -38,6 +38,8 @@ configurations {
 }
 
 dependencies {
+	compile fileTree(dir:'libs',include:['*.jar'])
+
     testCompile "junit:junit:$junit_version"
 
     // Corda integration dependencies
