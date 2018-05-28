@@ -17,7 +17,7 @@ The app includes:
 	5. NGO Insights - This is the NGO Secure machine learning engine. The insights (if any) received from the NGO ML engine is displayed on the node UI. NGO Insights feature is available only for the parties colloborating on the block chain and this is not applicable for the notary.
 
 # Instructions for setting up te NGO Secure application with R3 Corda Demo bench
-1. Create the following folder repositories in the C Driver
+1. Create the following folder repositories in the C Drive
 	a. C:\BlockChain
 	b. C:\BlockChain\Output
 2.  git clone https://github.com/ngosecure/ngosecure_blockchain.git to the "C:\BlockChain" directory
